@@ -1,3 +1,4 @@
+
 (function () {
     let currentFilter = "all";
 
@@ -13,13 +14,31 @@
         return document.getElementById("error-msg");
     }
 
+    // Show or hide the error message
+    function showError(show) {
+        const errorMsg = getErrorMsg();
+
+        if (!errorMsg) return;
+
+        errorMsg.hidden = !show;
+        errorMsg.style.display = show ? "" : "none";
+
+        if (show) {
+            errorMsg.classList.remove("hidden");
+        } else {
+            errorMsg.classList.add("hidden");
+        }
+    }
+
     // Update the counter
     function updateCounter() {
         const todoList = getTodoList();
         const counter = getCounter();
+
         if (!todoList || !counter) return;
 
         const items = todoList.querySelectorAll("li");
+
         let remaining = 0;
 
         items.forEach(function (item) {
@@ -34,6 +53,7 @@
     // Apply the selected filter
     function applyFilter() {
         const todoList = getTodoList();
+
         if (!todoList) return;
 
         const items = todoList.querySelectorAll("li");
@@ -55,57 +75,67 @@
     function addTodo(textParam) {
         const todoInput = document.getElementById("todo-input");
         const todoList = getTodoList();
-        const errorMsg = getErrorMsg();
 
-        const text = (typeof textParam === "string" ? textParam : (todoInput ? todoInput.value : "")).trim();
+        const text = (
+            typeof textParam === "string"
+                ? textParam
+                : (todoInput ? todoInput.value : "")
+        ).trim();
 
         if (text === "") {
-            if (errorMsg) errorMsg.hidden = false;
+            showError(true);
             return;
         }
 
-        if (errorMsg) errorMsg.hidden = true;
         if (!todoList) return;
 
+        showError(false);
+
         const li = document.createElement("li");
+
         const span = document.createElement("span");
-        const deleteBtn = document.createElement("button");
-
+        span.className = "item-text";
         span.textContent = text;
-        span.className = "item-text"; // Ensure test suite finds .item-text
 
+        const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "Delete";
-        deleteBtn.classList.add("delete-btn");
+        deleteBtn.className = "delete-btn";
         deleteBtn.type = "button";
 
         li.appendChild(span);
         li.appendChild(deleteBtn);
+
         todoList.appendChild(li);
 
-        if (todoInput) todoInput.value = "";
+        if (todoInput) {
+            todoInput.value = "";
+        }
 
         applyFilter();
         updateCounter();
     }
 
-    // Expose addItem globally so Jest tests can call it directly
+    // Required by the provided Jest tests
     window.addItem = addTodo;
 
     function initApp() {
         const addBtn = document.getElementById("add-btn");
         const todoInput = document.getElementById("todo-input");
         const todoList = getTodoList();
+
         const filterAll = document.getElementById("filter-all");
         const filterActive = document.getElementById("filter-active");
         const filterDone = document.getElementById("filter-done");
 
-        if (addBtn && !addBtn.dataset.bound) {
-            addBtn.dataset.bound = "true";
-            addBtn.addEventListener("click", () => addTodo());
+        // Add using button
+        if (addBtn) {
+            addBtn.addEventListener("click", function () {
+                addTodo();
+            });
         }
 
-        if (todoInput && !todoInput.dataset.bound) {
-            todoInput.dataset.bound = "true";
+        // Add using Enter
+        if (todoInput) {
             todoInput.addEventListener("keydown", function (event) {
                 if (event.key === "Enter") {
                     addTodo();
@@ -113,27 +143,36 @@
             });
         }
 
-        if (todoList && !todoList.dataset.bound) {
-            todoList.dataset.bound = "true";
+        // Event delegation
+        if (todoList) {
             todoList.addEventListener("click", function (event) {
+
+                // Delete item
                 const deleteBtn = event.target.closest(".delete-btn");
 
                 if (deleteBtn && todoList.contains(deleteBtn)) {
                     deleteBtn.closest("li").remove();
+
                     applyFilter();
                     updateCounter();
                     return;
                 }
 
-                const itemText = event.target.closest("li");
+                // Toggle completed status
+                const itemText = event.target.closest(".item-text");
+
                 if (itemText && todoList.contains(itemText)) {
-                    itemText.classList.toggle("completed");
+                    const li = itemText.closest("li");
+
+                    li.classList.toggle("completed");
+
                     applyFilter();
                     updateCounter();
                 }
             });
         }
 
+        // Filter: All
         if (filterAll) {
             filterAll.addEventListener("click", function () {
                 currentFilter = "all";
@@ -141,6 +180,7 @@
             });
         }
 
+        // Filter: Active
         if (filterActive) {
             filterActive.addEventListener("click", function () {
                 currentFilter = "active";
@@ -148,6 +188,7 @@
             });
         }
 
+        // Filter: Completed
         if (filterDone) {
             filterDone.addEventListener("click", function () {
                 currentFilter = "done";
@@ -158,9 +199,11 @@
         updateCounter();
     }
 
+    // Initialize the application
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", initApp);
     } else {
         initApp();
     }
-})(); 
+
+})();
