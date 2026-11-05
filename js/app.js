@@ -1,4 +1,12 @@
-function initTodoApp() {
+document.addEventListener('DOMContentLoaded', () => {
+  setupTodoApp();
+});
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  setupTodoApp();
+}
+
+function setupTodoApp() {
   const todoInput = document.getElementById('todo-input');
   const addBtn = document.getElementById('add-btn');
   const todoList = document.getElementById('todo-list');
@@ -11,7 +19,7 @@ function initTodoApp() {
   let currentFilter = 'all';
 
   function updateCounter() {
-    if (!todoList || !counter) return;
+    if (!todoList) return;
     const items = todoList.querySelectorAll('li');
     let leftCount = 0;
     items.forEach(item => {
@@ -19,7 +27,9 @@ function initTodoApp() {
         leftCount++;
       }
     });
-    counter.textContent = `${leftCount} item(s) left`;
+    if (counter) {
+      counter.textContent = `${leftCount} item(s) left`;
+    }
   }
 
   function applyFilter() {
@@ -55,10 +65,13 @@ function initTodoApp() {
     applyFilter();
   }
 
-  if (addBtn) {
+  if (addBtn && !addBtn.dataset.listenerAttached) {
+    addBtn.dataset.listenerAttached = 'true';
     addBtn.addEventListener('click', addTodo);
   }
-  if (todoInput) {
+
+  if (todoInput && !todoInput.dataset.listenerAttached) {
+    todoInput.dataset.listenerAttached = 'true';
     todoInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         addTodo();
@@ -66,7 +79,8 @@ function initTodoApp() {
     });
   }
 
-  if (todoList) {
+  if (todoList && !todoList.dataset.listenerAttached) {
+    todoList.dataset.listenerAttached = 'true';
     todoList.addEventListener('click', (e) => {
       const li = e.target.closest('li');
       if (!li) return;
@@ -81,19 +95,24 @@ function initTodoApp() {
     });
   }
 
-  if (filterAll) {
+  if (filterAll && !filterAll.dataset.listenerAttached) {
+    filterAll.dataset.listenerAttached = 'true';
     filterAll.addEventListener('click', () => {
       currentFilter = 'all';
       applyFilter();
     });
   }
-  if (filterActive) {
+
+  if (filterActive && !filterActive.dataset.listenerAttached) {
+    filterActive.dataset.listenerAttached = 'true';
     filterActive.addEventListener('click', () => {
       currentFilter = 'active';
       applyFilter();
     });
   }
-  if (filterDone) {
+
+  if (filterDone && !filterDone.dataset.listenerAttached) {
+    filterDone.dataset.listenerAttached = 'true';
     filterDone.addEventListener('click', () => {
       currentFilter = 'done';
       applyFilter();
@@ -101,11 +120,4 @@ function initTodoApp() {
   }
 
   updateCounter();
-}
-
-// Safely initialize whether DOM is ready or loading
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initTodoApp);
-} else {
-  initTodoApp();
 }
