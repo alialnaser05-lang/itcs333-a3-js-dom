@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initTodoApp() {
   const todoInput = document.getElementById('todo-input');
   const addBtn = document.getElementById('add-btn');
   const todoList = document.getElementById('todo-list');
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentFilter = 'all';
 
-  // Update live counter of remaining items
   function updateCounter() {
+    if (!todoList || !counter) return;
     const items = todoList.querySelectorAll('li');
     let leftCount = 0;
     items.forEach(item => {
@@ -19,13 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
         leftCount++;
       }
     });
-    if (counter) {
-      counter.textContent = `${leftCount} item(s) left`;
-    }
+    counter.textContent = `${leftCount} item(s) left`;
   }
 
-  // Apply active filter to list items
   function applyFilter() {
+    if (!todoList) return;
     const items = todoList.querySelectorAll('li');
     items.forEach(item => {
       const isCompleted = item.classList.contains('completed');
@@ -39,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Add a new task item
   function addTodo() {
+    if (!todoInput || !todoList) return;
     const text = todoInput.value.trim();
     if (text === '') {
       if (errorMsg) errorMsg.style.display = 'block';
@@ -49,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (errorMsg) errorMsg.style.display = 'none';
 
     const li = document.createElement('li');
-    li.innerHTML = `<span>${text}</span> <button class="delete-btn">Delete</button>`;
+    li.innerHTML = `<span class="item-text">${text}</span> <button class="delete-btn">Delete</button>`;
     todoList.appendChild(li);
 
     todoInput.value = '';
@@ -57,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFilter();
   }
 
-  // Event Listeners for adding items
   if (addBtn) {
     addBtn.addEventListener('click', addTodo);
   }
@@ -69,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Event Delegation on #todo-list (Single listener for toggling & deleting)
   if (todoList) {
     todoList.addEventListener('click', (e) => {
       const li = e.target.closest('li');
@@ -85,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filter Button Listeners
   if (filterAll) {
     filterAll.addEventListener('click', () => {
       currentFilter = 'all';
@@ -105,6 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial counter check
   updateCounter();
-});
+}
+
+// Safely initialize whether DOM is ready or loading
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTodoApp);
+} else {
+  initTodoApp();
+}
