@@ -6,59 +6,45 @@
         return document.getElementById("todo-list");
     }
 
-    function getCounter() {
-        return document.getElementById("counter");
-    }
-
-    function getErrorMsg() {
-        return document.getElementById("error-msg");
-    }
-
-    // Show or hide the error message
-    function showError(show) {
-        const errorMsg = getErrorMsg();
-
-        if (!errorMsg) return;
-
-        errorMsg.hidden = !show;
-        errorMsg.style.display = show ? "" : "none";
-
-        if (show) {
-            errorMsg.classList.remove("hidden");
-        } else {
-            errorMsg.classList.add("hidden");
-        }
-    }
-
-    // Update the counter
     function updateCounter() {
         const todoList = getTodoList();
-        const counter = getCounter();
+        const counter = document.getElementById("counter");
 
         if (!todoList || !counter) return;
 
-        const items = todoList.querySelectorAll("li");
-
         let remaining = 0;
 
-        items.forEach(function (item) {
+        for (const item of todoList.children) {
             if (!item.classList.contains("completed")) {
                 remaining++;
             }
-        });
+        }
 
         counter.textContent = remaining + " item(s) left";
     }
 
-    // Apply the selected filter
+    function showError(show) {
+        const errorMsg = document.getElementById("error-msg");
+
+        if (!errorMsg) return;
+
+        if (show) {
+            errorMsg.classList.remove("hidden");
+            errorMsg.hidden = false;
+            errorMsg.style.display = "";
+        } else {
+            errorMsg.classList.add("hidden");
+            errorMsg.hidden = true;
+            errorMsg.style.display = "";
+        }
+    }
+
     function applyFilter() {
         const todoList = getTodoList();
 
         if (!todoList) return;
 
-        const items = todoList.querySelectorAll("li");
-
-        items.forEach(function (item) {
+        for (const item of todoList.children) {
             const isCompleted = item.classList.contains("completed");
 
             if (currentFilter === "all") {
@@ -68,7 +54,7 @@
             } else if (currentFilter === "done") {
                 item.style.display = isCompleted ? "" : "none";
             }
-        });
+        }
     }
 
     // Add a new item
@@ -115,39 +101,30 @@
         updateCounter();
     }
 
-    // Required by the provided Jest tests
+    // Expose function required by the provided tests
     window.addItem = addTodo;
 
     function initApp() {
-        const addBtn = document.getElementById("add-btn");
-        const todoInput = document.getElementById("todo-input");
+        const form = document.getElementById("todo-form");
         const todoList = getTodoList();
 
         const filterAll = document.getElementById("filter-all");
         const filterActive = document.getElementById("filter-active");
         const filterDone = document.getElementById("filter-done");
 
-        // Add using button
-        if (addBtn) {
-            addBtn.addEventListener("click", function () {
+        // Handle form submission (button and Enter)
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
                 addTodo();
             });
         }
 
-        // Add using Enter
-        if (todoInput) {
-            todoInput.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    addTodo();
-                }
-            });
-        }
-
-        // Event delegation
+        // Event delegation for deleting and completing items
         if (todoList) {
             todoList.addEventListener("click", function (event) {
 
-                // Delete item
+                // Delete an item
                 const deleteBtn = event.target.closest(".delete-btn");
 
                 if (deleteBtn && todoList.contains(deleteBtn)) {
@@ -158,7 +135,7 @@
                     return;
                 }
 
-                // Toggle completed status
+                // Toggle completion
                 const itemText = event.target.closest(".item-text");
 
                 if (itemText && todoList.contains(itemText)) {
@@ -172,7 +149,7 @@
             });
         }
 
-        // Filter: All
+        // Show all items
         if (filterAll) {
             filterAll.addEventListener("click", function () {
                 currentFilter = "all";
@@ -180,7 +157,7 @@
             });
         }
 
-        // Filter: Active
+        // Show active items
         if (filterActive) {
             filterActive.addEventListener("click", function () {
                 currentFilter = "active";
@@ -188,7 +165,7 @@
             });
         }
 
-        // Filter: Completed
+        // Show completed items
         if (filterDone) {
             filterDone.addEventListener("click", function () {
                 currentFilter = "done";
@@ -199,11 +176,7 @@
         updateCounter();
     }
 
-    // Initialize the application
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initApp);
-    } else {
-        initApp();
-    }
+    // Initialize immediately because the script is at the end of body
+    initApp();
 
-})();
+})(); 
